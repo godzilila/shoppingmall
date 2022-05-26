@@ -1,44 +1,90 @@
-// shoppingmall.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+// shoppingmall.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include "stdafx.h"
 #include<stdio.h>
 #include<iostream>
 using namespace std;
-
-typedef struct goods
+int cou = 0;
+int min(int a,int b)
 {
-	int sornum;
-	int neednum;
-	int single;
-}GOO;
-typedef struct ways
+	if (a > b)
+		return b;
+	else
+		return a;
+}
+int find(int curneeds[101], int single[101], int curspec[101][101], int num)
 {
-	int num;
-	int strategy[101];
-}Cre;
-int main()
-{
-	GOO* good;
-	int num;
-	cin >> num;
-	good = new GOO[num];
-	for(int i=0;i<num;i++)
+	int minprice=0;
+	for (int i = 0; i < num; i++)
 	{
-		cin >> good[i].sornum >> good[i].neednum >> good[i].single;
+		minprice += curneeds[i] * single[i];
 	}
-	Cre* ste;
-	int strnum;
-	cin >> strnum;
-	ste = new Cre[strnum];
-	for (int i = 0; i < strnum; i++)
+	for (int i = 0; i < cou; i++)
 	{
-		cin >> ste[i].num;
-		for (int j = 0; j < ste[i].num * 2 + 1; j++)
+		int specprice = curspec[i][100];
+		int countnext = 0;
+		int nextneeds[101];
+		memset(nextneeds,0,sizeof(nextneeds));
+		for (int j = 0; j < 100; j++)
 		{
-			cin >> ste[i].strategy[j];
+			if (curspec[i][j] > curneeds[j])
+				break;
+			nextneeds[j] = curneeds[j] - curspec[i][j];
+		}
+		for (int j = 0; j < 100; j++)
+		{
+			if (curneeds[j])
+				countnext++;
+		}
+		if (countnext == num) {
+			minprice = min(minprice, specprice + find(nextneeds, single, curspec, num));
 		}
 	}
+	return minprice;
+}
+int main(){
+	int sortgood[101], needs[101], single[101], specsort[101], spec[101][101], truespec[101][101];
+	int num, innum, specnum;
+	memset(needs, 0, sizeof(needs));
+	for (int i = 0; i < 101; i++)
+		memset(spec[i], 0, sizeof(spec[i]));
+	for (int i = 0; i < 101; i++)
+		memset(truespec[i], 0, sizeof(truespec[i]));
+	cin >> num;
+	for (int i = 0; i < num; i++)
+	{
+		cin>>sortgood[i]>>needs[i]>>single[i];
+	}
+	cin >> specnum;
+	int nn = 0;
+	for (int i = 0; i < specnum; i++)
+	{
+		cin >> innum;
+		int mm = 0;
+		for (int j = 0; j < innum*2 ; j++)
+		{
+			if (j % 2 == 0)
+				cin >> specsort[nn++];
+			else
+				cin >> spec[i][mm++];
+		}
+		cin >> spec[i][100];
+	}
+	for (int i = 0; i < specnum; i++)
+	{
+		int sum = 0;
+		for (int j = 0; j < num; j++)
+		{
+			sum += spec[i][j] * single[j];
+		}
+		if (sum > spec[i][100]){
+			for(int ii=0;ii<101;ii++)
+				truespec[cou][ii] = spec[i][ii];
+			cou++;
+		}
+			
+	}
+	cout << find(needs, single, truespec, num);
 	return 0;
 }
-
